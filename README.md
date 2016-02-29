@@ -4,7 +4,7 @@
 
 [Ecto](https://github.com/elixir-lang/ecto) is an incredible tool for building relational repositories, schemas, and changesets for Elixir applications.  However, the structure and query interfaces for graph databases have special needs that a relational interface just cannot wholly meet, and in reality would sacrifice much of the performance and cross-referential gains that projects use graph databases to address.
 
-The goal is not to compete with Ecto, but provide a similar extraction layer specific to the peculiarities found in graph database systems.  Support for non-graph databases is not planned.
+The goal is not to compete with Ecto, but provide a similar abstraction layer specific to the peculiarities found in graph database systems.  Support for non-graph databases is not planned.
 
 ## Installation
 
