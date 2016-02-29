@@ -24,6 +24,8 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
 ## Background
 
-This project came about from conversations in the elixir/ecto slack group and email correspondence with [florinpatrascu](https://github.com/florinpatrascu) regarding his experiences, trials and tribulations encountered while building the [Neo4j.Sips](https://github.com/florinpatrascu/neo4j_sips) package.
+This project came about from conversations in the elixir/ecto Slack group and email correspondence with [florinpatrascu](https://github.com/florinpatrascu) regarding his experiences, trials and tribulations encountered while building the [Neo4j.Sips](https://github.com/florinpatrascu/neo4j_sips) package.
 
 In reviewing various cross-database and cross-language interfaces that could be applied equally well across many common graph databases via DSL, the most promising technology I've found so far to base the DSL on is the [Apache TinkerPop](http://tinkerpop.apache.org/) Gremlin interface.  The good folks who initially developed TinkerPop as well as Apache's team have come up with a query interface that works across several popular graph databases and has been ported to quite a few different languages (including some FP ones) without sacrificing the specific features and functionality a graph database offers.
+
+Oh, and the name?  Anyone ever play with a [Spirograph](https://en.wikipedia.org/wiki/Spirograph)?  :)
