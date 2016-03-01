@@ -7,7 +7,8 @@ defmodule Spiro.Mixfile do
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps,
+     docs: [logo: "assets/spiro-logo.png"]]
   end
 
   # Configuration for the OTP application
@@ -27,6 +28,7 @@ defmodule Spiro.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [{:earmark, "~> 0.1", only: :dev},
+     {:ex_doc, "~> 0.11", only: :dev}]
   end
 end

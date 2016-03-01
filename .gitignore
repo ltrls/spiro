@@ -1,5 +1,12 @@
+# Standard Elixir build artifacts
 /_build
 /cover
 /deps
 erl_crash.dump
 *.ez
+
+# OSX filesystem artifacts
+.DS_Store
+
+# Generated directories
+doc
