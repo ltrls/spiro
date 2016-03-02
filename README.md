@@ -2,9 +2,9 @@
 
 **Spiro** aims to be Ecto's sibling in the [Elixir](http://elixir-lang.org/) ecosystem, providing a DSL interface for [graph databases](https://en.wikipedia.org/wiki/Graph_database).
 
-[Ecto](https://github.com/elixir-lang/ecto) is an incredible tool for building relational repositories, schemas, and changesets for Elixir applications.  However, the structure and query interfaces for graph databases have special needs that a relational interface just cannot wholly meet, and in reality would sacrifice much of the performance and cross-referential gains that projects use graph databases to address.
+[Ecto](https://github.com/elixir-lang/ecto) is an incredible tool for building relational repositories, schemas, and changesets for Elixir applications.  However, the structure and query interfaces for graph databases have special needs that a relational interface just cannot wholly meet.  In reality, using SQL-based interface would sacrifice much of the performance and cross-referential features that projects use graph databases to achieve.
 
-The goal is not to compete with Ecto, but provide a similar abstraction layer specific to the peculiarities found in graph database systems.  Support for non-graph databases is not planned.
+The goal is not to compete with Ecto, but provide a similar abstraction layer specific to the peculiarities found in graph database systems.  As such, support for non-graph datastores is not planned.
 
 ## Installation
 
@@ -22,10 +22,28 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
           [applications: [:spiro]]
         end
 
+## Roadmap
+
+Planned development targets, in order:
+
+  1. Erlang's [digraph](http://erlang.org/doc/man/digraph.html)
+      Why start here?  Because it's built in and has a fairly simple, well-documented interface.
+  2. [Neo4j](http://neo4j.com/)
+  3. [OrientDB](http://orientdb.com/orientdb/)
+  4. [Gremlin Server](http://tinkerpop.apache.org/docs/3.1.1-incubating/reference/#gremlin-server)
+
+Once digraph support is in and the architecture has been validated, additional support to add more targets would be greatly appreciated!
+
+## Contributing
+
+Once the core package is fairly stable, contributions will be more than welcome!  Additional datastore support would preferably be developed in separate projects named something like **spiro_xyz** for datastore XYZ to keep the core framework small.
+
+The only datastore support that will be bundled into **Spiro** directly will be digraph since it's built into Elixir/Erlang.
+
 ## Background
 
-This project came about from conversations in the elixir/ecto Slack group and email correspondence with [florinpatrascu](https://github.com/florinpatrascu) regarding his experiences, trials and tribulations encountered while building the [Neo4j.Sips](https://github.com/florinpatrascu/neo4j_sips) package.
+This project came about from conversations in the elixir/ecto Slack group and email correspondence with [florinpatrascu](https://github.com/florinpatrascu) regarding his experiences, trials and tribulations while building the [Neo4j.Sips](https://github.com/florinpatrascu/neo4j_sips) package.
 
-In reviewing various cross-database and cross-language interfaces that could be applied equally well across many common graph databases via DSL, the most promising technology I've found so far to base the DSL on is the [Apache TinkerPop](http://tinkerpop.apache.org/) Gremlin interface.  The good folks who initially developed TinkerPop as well as Apache's team have come up with a query interface that works across several popular graph databases and has been ported to quite a few different languages (including some FP ones) without sacrificing the specific features and functionality a graph database offers.
+In reviewing various cross-database and cross-language interfaces that could be applied equally well across many common graph databases, the most promising technology I've found so far to base the DSL on is the [Apache TinkerPop](http://tinkerpop.apache.org/) Gremlin interface.  The good folks who initially developed TinkerPop as well as Apache's team have come up with a query interface that works across several popular graph databases and has been ported to quite a few different languages (including some functional ones) without sacrificing the specific features and functionality a graph database offers.
 
 Oh, and the name?  Anyone ever play with a [Spirograph](https://en.wikipedia.org/wiki/Spirograph)?  :)
