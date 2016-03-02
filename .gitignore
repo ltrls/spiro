@@ -10,3 +10,8 @@ erl_crash.dump
 
 # Generated directories
 doc
+
+# IntelliJ IDEA project files
+.idea
+*.iml
+
