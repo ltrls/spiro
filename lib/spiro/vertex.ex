@@ -1,4 +1,4 @@
-defmodule Spiro.Element.Vertex do
+defmodule Spiro.Vertex do
   @moduledoc """
   Provides operations specific to vertex elements.
 

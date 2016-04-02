@@ -1,4 +1,4 @@
-defmodule Spiro.Element.Edge do
+defmodule Spiro.Edge do
   @moduledoc """
   Provides operations specific to edge elements.
 
