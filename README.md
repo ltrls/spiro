@@ -24,7 +24,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
 ## Usage
 
-Below is a working draft of what graph manipulatoon and traversal might look like.
+Below is a working draft of what graph manipulation and traversal might look like.  Sample graph and traversal borrowed from the [TinkerPop3 docs](http://tinkerpop.apache.org/docs/3.1.1-incubating/reference/#_the_graph_structure).
 
 ```elixir
 # In your config/config.exs file
@@ -51,7 +51,7 @@ defmodule Sample.Person do
   def element(person, params \\ :empty) do
     person
     |> cast(params, ~w(name), ~w(age))
-    |> valdiate_number(:age, greater_than: 13)
+    |> validate_number(:age, greater_than: 13)
   end
 end
 
@@ -112,7 +112,7 @@ defmodule Sample.App do
     MyGraph.addEdge(peter, Created.element(weight: 0.2), lop)
   end
 
-  @doc "Traverse graph looking for friends of so-and-so."
+  @doc "Traverse graph looking for friends of so-and-so, return list of names."
   def find_friends(name) do
     MyGraph.traversal()
     |> V()
