@@ -98,7 +98,7 @@ defmodule Sample.App do
     # Add some vertices to the graph.
     marko = MyGraph.addVertex!(Person.element(name: "marko", age: 29))
     vadas = MyGraph.addVertex!(Person.element(name: "vadas", age: 27))
-    lop = MyGraph.addVertex!(Software.element(name: "marko", lang: "java"))
+    lop = MyGraph.addVertex!(Software.element(name: "lop", lang: "java"))
     josh = MyGraph.addVertex!(Person.element(name: "josh", age: 32))
     ripple = MyGraph.addVertex!(Software.element(name: "ripple", lang: "java"))
     peter = MyGraph.addVertex!(Person.element(name: "peter", age: 35))
