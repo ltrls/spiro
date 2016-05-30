@@ -20,7 +20,7 @@ defmodule Spiro.Graph do
 
     unless adapter do
       raise ArgumentError, "missing :adapter configuration in " <>
-      "config #{inspect otp_app}, #{inspect repo}"
+      "config #{inspect otp_app}, #{inspect graph}"
     end
 
     unless Code.ensure_loaded?(adapter) do
