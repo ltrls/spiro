@@ -1,6 +1,6 @@
 defmodule Spiro.Traverser do
   @moduledoc false
 
-  defstruct graph: :nil,
+  #defstruct graph: :nil,
 
 end

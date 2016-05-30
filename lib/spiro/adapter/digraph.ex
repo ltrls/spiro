@@ -11,7 +11,6 @@ defmodule Spiro.Adapter.Digraph do
   def aggregate(trav), do: trav
   def as(trav), do: trav
   def barrier(trav), do: trav
-  def as(trav), do: trav
   def by(trav), do: trav
   def cap(trav), do: trav
   def coalesce(trav), do: trav
