@@ -3,15 +3,15 @@ defmodule Spiro.Adapter do
   Provides base for graph system adapters.
   """
 
-  @type Edge.t
-  @type Element.t
-  @type Graph.t
-  @type Property.t
-  @type Vertex.t
+  # @type Edge.t
+  # @type Element.t
+  # @type Graph.t
+  # @type Property.t
+  # @type Vertex.t
 
 
-  @callback addV(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback addE(Spiro.Traversal.t) :: Spiro.Traversal.t
+  # @callback addV(Spiro.Traversal.t) :: Spiro.Traversal.t
+  # @callback addE(Spiro.Traversal.t) :: Spiro.Traversal.t
   @callback property(Spiro.Traversal.t) :: Spiro.Traversal.t
   @callback aggregate(Spiro.Traversal.t) :: Spiro.Traversal.t
   @callback as(Spiro.Traversal.t) :: Spiro.Traversal.t

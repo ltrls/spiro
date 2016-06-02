@@ -5,10 +5,19 @@ defmodule Spiro.Graph do
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
-      {otp_app, adapter, type} = Spiro.Graph.parse_config(__MODULE__, opts)
+      {otp_app, adapter, config} = Spiro.Graph.parse_config(__MODULE__, opts)
       @otp_app otp_app
       @adapter adapter
-      @type type
+      @config config
+
+      def traversal(), do: @adapter.traversal()
+      def new(), do: @adapter.new(__MODULE__)
+      def addVertex(v), do: @adapter.addV(v, __MODULE__)
+      def addVertex!(v), do: @adapter.addV(v, __MODULE__)
+      def addEdge(v, e1, e2), do: @adapter.addE(v, e1, e2, __MODULE__)
+      def addEdge!(v, e1, e2), do: @adapter.addE(v, e1, e2, __MODULE__)
+      def vertices(), do: @adapter.vertices(__MODULE__)
+      def edges(), do: @adapter.edges(__MODULE__)
     end
   end
   
