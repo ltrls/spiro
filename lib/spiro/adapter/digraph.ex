@@ -4,11 +4,11 @@ defmodule Spiro.Adapter.Digraph do
   """
 
   # Implement the adapter behaviour for this graph type.
-  use GenServer
   @behaviour Spiro.Adapter
 
-  def new(module) do
-    Agent.start_link(fn -> {:digraph.new(), 0, 0} end, name: module)
+  def new(opts, module) do
+    opts = opts || []
+    Agent.start_link(fn -> {:digraph.new(opts), 0, 0} end, name: module)
   end
 
   def addV(v, module) do
