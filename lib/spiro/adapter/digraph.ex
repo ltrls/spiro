@@ -17,7 +17,7 @@ defmodule Spiro.Adapter.Digraph do
         :digraph.add_vertex(graph, no_v, v.properties)
         {no_v, {graph, no_v + 1, no_e}}
     end)
-    %{v | id: id}
+    Map.put(v, :id, id)
   end
 
   def addE(e, v1, v2, module) do
@@ -26,7 +26,7 @@ defmodule Spiro.Adapter.Digraph do
         :digraph.add_edge(graph, no_e, v1.id, v2.id, e.properties)
         {no_e, {graph, no_v, no_e + 1}}
     end)
-    %{e | id: id}
+    Map.put(e, :id, id)
   end
 
   def vertices(module) do
