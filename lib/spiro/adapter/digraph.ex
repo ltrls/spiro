@@ -6,6 +6,9 @@ defmodule Spiro.Adapter.Digraph do
   # Implement the adapter behaviour for this graph type.
   @behaviour Spiro.Adapter
 
+  alias Spiro.Vertex
+  alias Spiro.Edge
+
   def new(opts, module) do
     opts = opts || []
     Agent.start_link(fn -> {:digraph.new(opts), 0, 0} end, name: module)

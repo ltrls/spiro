@@ -3,6 +3,9 @@ defmodule Spiro.Graph do
   Provides operations specific to graphs.
   """
 
+  alias Spiro.Vertex
+  alias Spiro.Edge
+
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
       {otp_app, adapter, config, adapter_opts} = Spiro.Graph.parse_config(__MODULE__, opts)
