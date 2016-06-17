@@ -9,7 +9,7 @@ defmodule Spiro.Adapter.Digraph do
   alias Spiro.Vertex
   alias Spiro.Edge
 
-  def new(opts, module) do
+  def start_link(opts, module) do
     opts = opts || []
     Agent.start_link(fn -> {:digraph.new(opts), 0, 0} end, name: module)
   end
@@ -33,28 +33,29 @@ defmodule Spiro.Adapter.Digraph do
   end
 
   def vertices(module) do
-    Agent.get(module, fn
-      ({graph, _, _}) -> Enum.map(:digraph.vertices(graph), fn (id) -> %Vertex{id: id} end) end)
+    Enum.map(get_agent(module, &:digraph.vertices(&1)), &(%Vertex{id: &1}))
   end
 
   def edges(module) do
-    Agent.get(module, fn
-      ({graph, _, _}) -> Enum.map(:digraph.edges(graph), fn (id) -> %Edge{id: id} end) end)
+    Enum.map(get_agent(module, &:digraph.edges(&1)), &(%Edge{id: &1}))
   end
 
   def vertex_properties(%Vertex{id: id}, module) do
-    Agent.get(module, fn
-      ({graph, _, _}) -> with {_id, properties} = :digraph.vertex(graph, id), do: properties end)
+    with {_id, properties} = get_agent(module, &:digraph.vertex(&1, id)), do: properties
   end
 
   def edge_properties(%Edge{id: id}, module) do
-    Agent.get(module, fn
-      ({graph, _, _}) -> with {_id, _e1, _e2, properties} = :digraph.edge(graph, id), do: properties end)
+    with {_id, _e1, _e2, properties} = get_agent(module, &:digraph.edge(&1, id)), do: properties
   end
 
   def edge_endpoints(%Edge{id: id}, module) do
+    with {_id, e1, e2, _properties} = get_agent(module, &:digraph.edge(&1, id)), do: {%Vertex{id: e1}, %Vertex{id: e2}}
+  end
+
+  defp get_agent(module, fun) do
     Agent.get(module, fn
-      ({graph, _, _}) -> with {_id, e1, e2, _properties} = :digraph.edge(graph, id), do: {%Vertex{id: e1}, %Vertex{id: e2}} end)
+      {graph, _, _} -> fun.(graph)
+    end)
   end
 
   # def addV(trav), do: trav

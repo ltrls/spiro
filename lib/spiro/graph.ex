@@ -16,7 +16,7 @@ defmodule Spiro.Graph do
 
       def traversal(), do: @adapter.traversal()
 
-      def new(), do: @adapter.new(@adapter_opts, __MODULE__)
+      def start_link(), do: @adapter.start_link(@adapter_opts, __MODULE__)
 
       def addVertex(properties) when is_list(properties), do: @adapter.addV(%Vertex{properties: properties}, __MODULE__)
       def addVertex(%Vertex{} = v), do: @adapter.addV(v, __MODULE__)
