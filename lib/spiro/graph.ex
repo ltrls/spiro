@@ -43,6 +43,13 @@ defmodule Spiro.Graph do
       def add_endpoints(%Edge{} = edge) do
         with {from, to} = edge_endpoints(edge), do: edge |> Map.put(:from, from) |> Map.put(:to, to)
       end
+      
+      def in_degree(%Vertex{} = vertex), do: @adapter.in_degree(vertex, __MODULE__)
+      def out_degree(%Vertex{} = vertex), do: @adapter.out_degree(vertex, __MODULE__)
+      def in_edges(%Vertex{} = vertex), do: @adapter.in_edges(vertex, __MODULE__)
+      def out_edges(%Vertex{} = vertex), do: @adapter.out_edges(vertex, __MODULE__)
+      def in_neighbours(%Vertex{} = vertex), do: @adapter.in_neighbour(vertex, __MODULE__)
+      def out_neighbours(%Vertex{} = vertex), do: @adapter.out_neighbour(vertex, __MODULE__)
 
 
     end

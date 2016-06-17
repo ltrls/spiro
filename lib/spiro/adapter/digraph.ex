@@ -52,6 +52,30 @@ defmodule Spiro.Adapter.Digraph do
     with {_id, e1, e2, _properties} = get_agent(module, &:digraph.edge(&1, id)), do: {%Vertex{id: e1}, %Vertex{id: e2}}
   end
 
+  def in_degree(%Vertex{id: id}, module) do
+    get_agent(module, &:digraph.in_degree(&1, id))
+  end
+
+  def out_degree(%Vertex{id: id}, module) do
+    get_agent(module, &:digraph.out_degree(&1, id))
+  end
+
+  def in_edges(%Vertex{id: id}, module) do
+    Enum.map(get_agent(module, &:digraph.in_edges(&1, id)), &(%Edge{id: &1}))
+  end
+
+  def out_edges(%Vertex{id: id}, module) do
+    Enum.map(get_agent(module, &:digraph.out_edges(&1, id)), &(%Edge{id: &1}))
+  end
+
+  def in_neighbours(%Vertex{id: id}, module) do
+    Enum.map(get_agent(module, &:digraph.in_neighbours(&1, id)), &(%Vertex{id: &1}))
+  end
+
+  def out_neighbours(%Vertex{id: id}, module) do
+    Enum.map(get_agent(module, &:digraph.out_neighbours(&1, id)), &(%Vertex{id: &1}))
+  end
+
   defp get_agent(module, fun) do
     Agent.get(module, fn
       {graph, _, _} -> fun.(graph)
