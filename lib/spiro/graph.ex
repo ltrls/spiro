@@ -18,18 +18,14 @@ defmodule Spiro.Graph do
 
       def start_link(), do: @adapter.start_link(@adapter_opts, __MODULE__)
 
-      def addVertex(properties) when is_list(properties), do: @adapter.addV(%Vertex{properties: properties}, __MODULE__)
-      def addVertex(%Vertex{} = v), do: @adapter.addV(v, __MODULE__)
+      def add_vertex(properties) when is_list(properties), do: @adapter.add_vertex(%Vertex{properties: properties}, __MODULE__)
+      def add_vertex(%Vertex{} = v), do: @adapter.add_vertex(v, __MODULE__)
 
-      def addVertex!(v), do: @adapter.addV(v, __MODULE__)
+      def add_edge(properties, v1, v2) when is_list(properties), do: @adapter.add_edge(%Edge{properties: properties}, v1, v2, __MODULE__)
+      def add_edge(%Edge{} = e, v1, v2), do: @adapter.add_edge(e, v1, v2, __MODULE__)
 
-      def addEdge(properties, v1, v2) when is_list(properties), do: @adapter.addE(%Edge{properties: properties}, v1, v2, __MODULE__)
-      def addEdge(%Edge{} = e, v1, v2), do: @adapter.addE(e, v1, v2, __MODULE__)
-
-      def addEdge!(v, e1, e2), do: @adapter.addE(v, e1, e2, __MODULE__)
 
       def vertices(), do: @adapter.vertices(__MODULE__)
-
       def edges(), do: @adapter.edges(__MODULE__)
 
       def properties(list) when is_list(list), do: Enum.map(list, &properties(&1))
@@ -37,9 +33,7 @@ defmodule Spiro.Graph do
       def properties(%Edge{} = edge), do: @adapter.edge_properties(edge, __MODULE__)
 
       def add_properties(element), do: Map.put(element, :properties, properties(element))
-
       def edge_endpoints(%Edge{} = edge), do: @adapter.edge_endpoints(edge, __MODULE__)
-
       def add_endpoints(%Edge{} = edge) do
         with {from, to} = edge_endpoints(edge), do: edge |> Map.put(:from, from) |> Map.put(:to, to)
       end

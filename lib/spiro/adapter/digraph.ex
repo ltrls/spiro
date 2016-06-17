@@ -14,7 +14,7 @@ defmodule Spiro.Adapter.Digraph do
     Agent.start_link(fn -> {:digraph.new(opts), 0, 0} end, name: module)
   end
 
-  def addV(v, module) do
+  def add_vertex(v, module) do
     id = Agent.get_and_update(module, fn
       ({graph, no_v, no_e}) ->
         :digraph.add_vertex(graph, no_v, v.properties)
@@ -23,7 +23,7 @@ defmodule Spiro.Adapter.Digraph do
     Map.put(v, :id, id)
   end
 
-  def addE(e, v1, v2, module) do
+  def add_edge(e, v1, v2, module) do
     id = Agent.get_and_update(module, fn
       ({graph, no_v, no_e}) ->
         :digraph.add_edge(graph, no_e, v1.id, v2.id, e.properties)
