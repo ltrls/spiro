@@ -34,12 +34,27 @@ defmodule Spiro.Adapter.Digraph do
 
   def vertices(module) do
     Agent.get(module, fn
-      ({graph, _, _}) -> :digraph.vertices(graph) end)
+      ({graph, _, _}) -> Enum.map(:digraph.vertices(graph), fn (id) -> %Vertex{id: id} end) end)
   end
 
   def edges(module) do
     Agent.get(module, fn
-      ({graph, _, _}) -> :digraph.edges(graph) end)
+      ({graph, _, _}) -> Enum.map(:digraph.edges(graph), fn (id) -> %Edge{id: id} end) end)
+  end
+
+  def vertex_properties(%Vertex{id: id}, module) do
+    Agent.get(module, fn
+      ({graph, _, _}) -> with {_id, properties} = :digraph.vertex(graph, id), do: properties end)
+  end
+
+  def edge_properties(%Edge{id: id}, module) do
+    Agent.get(module, fn
+      ({graph, _, _}) -> with {_id, _e1, _e2, properties} = :digraph.edge(graph, id), do: properties end)
+  end
+
+  def edge_endpoints(%Edge{id: id}, module) do
+    Agent.get(module, fn
+      ({graph, _, _}) -> with {_id, e1, e2, _properties} = :digraph.edge(graph, id), do: {%Vertex{id: e1}, %Vertex{id: e2}} end)
   end
 
   # def addV(trav), do: trav
