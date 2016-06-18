@@ -32,6 +32,30 @@ defmodule Spiro.Adapter.Digraph do
     Map.put(e, :id, id)
   end
 
+  def update_vertex(%Vertex{id: id, properties: properties}, module) do
+    get_agent(module, &:digraph.add_vertex(&1, id, properties))
+  end
+  def update_vertex(%Vertex{id: id} = vertex, fun, module) do
+    properties = vertex_properties(vertex, module) |> fun.()
+    get_agent(module, &:digraph.add_vertex(&1, id, properties))
+  end
+
+  def update_edge(%Edge{id: id, properties: properties, from: from, to: to}, module) do
+    get_agent(module, &:digraph.add_edge(&1, id, from, to, properties))
+  end
+  def update_edge(%Edge{id: id, from: from, to: to} = edge, fun, module) do
+    properties = edge_properties(edge, module) |> fun.()
+    get_agent(module, &:digraph.add_edge(&1, id, from, to, properties))
+  end
+
+  def delete_vertex(%Vertex{id: id}, module) do
+    get_agent(module, &:digraph.del_vertex(&1, id))
+  end
+
+  def delete_edge(%Edge{id: id}, module) do
+    get_agent(module, &:digraph.del_edge(&1, id))
+  end
+
   def vertices(module) do
     Enum.map(get_agent(module, &:digraph.vertices(&1)), &(%Vertex{id: &1}))
   end

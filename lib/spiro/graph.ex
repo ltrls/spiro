@@ -24,6 +24,16 @@ defmodule Spiro.Graph do
       def add_edge(properties, v1, v2) when is_list(properties), do: @adapter.add_edge(%Edge{properties: properties}, v1, v2, __MODULE__)
       def add_edge(%Edge{} = e, v1, v2), do: @adapter.add_edge(e, v1, v2, __MODULE__)
 
+      def update_vertex(%Vertex{} = vertex, properties) when is_list(properties), do: @adapter.update_vertex(%{vertex | properties: properties}, __MODULE__)
+      def update_vertex(%Vertex{} = vertex, fun) when is_function(fun), do: @adapter.update_vertex(vertex, fun, __MODULE__)
+      def update_vertex(%Vertex{} = vertex), do: @adapter.update_vertex(vertex, __MODULE__)
+
+      def update_edge(%Vertex{} = edge, properties) when is_list(properties), do: @adapter.update_edge(%{edge | properties: properties}, __MODULE__)
+      def update_edge(%Vertex{} = edge, fun) when is_function(fun), do: @adapter.update_edge(edge, fun, __MODULE__)
+      def update_edge(%Vertex{} = edge), do: @adapter.update_edge(edge, __MODULE__)
+
+      def delete_vertex(%Vertex{} = vertex), do: @adapter.delete_vertex(vertex, __MODULE__)
+      def delete_edge(%Edge{} = edge), do: @adapter.delete_edge(edge, __MODULE__)
 
       def vertices(), do: @adapter.vertices(__MODULE__)
       def edges(), do: @adapter.edges(__MODULE__)
@@ -32,8 +42,9 @@ defmodule Spiro.Graph do
       def properties(%Vertex{} = vertex), do: @adapter.vertex_properties(vertex, __MODULE__)
       def properties(%Edge{} = edge), do: @adapter.edge_properties(edge, __MODULE__)
 
-      def add_properties(element), do: Map.put(element, :properties, properties(element))
       def edge_endpoints(%Edge{} = edge), do: @adapter.edge_endpoints(edge, __MODULE__)
+
+      def add_properties(element), do: Map.put(element, :properties, properties(element))
       def add_endpoints(%Edge{} = edge) do
         with {from, to} = edge_endpoints(edge), do: edge |> Map.put(:from, from) |> Map.put(:to, to)
       end
