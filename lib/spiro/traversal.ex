@@ -39,7 +39,6 @@ defmodule Spiro.Traversal do
   def path(trav), do: addStep(trav, :path)
   def property(trav, key, value), do: addStep(trav, :property, %{key: key, value: value})
   def range(trav, low, high), do: addStep(trav, :range, %{low: low, high: high})
-  def repeat(trav, predicate), do: addStep(trav, :repeat, %{predicate: predicate})
   def sum(trav), do: addStep(trav, :sum)
   def tail(trav, count \\ 1), do: addStep(trav, :tail, %{count: count})
   def timeLimit(trav, timeout), do: addStep(trav, :timeLimit, %{timeout: timeout})
@@ -81,15 +80,19 @@ defmodule Spiro.Traversal do
   #def fold(trav, seed, reducer), do: addStep(trav, :fold, %{seed: seed, reducer: reducer})
   #def group(trav), do: addStep(trav, :group)
   #def is(trav, predicate), do: addStep(trav, :is, %{predicate: predicate})
+  #def repeat(trav, predicate), do: addStep(trav, :repeat, %{predicate: predicate})
   #def sample(trav, count), do: addStep(trav, :sample, %{count: count})
   #def simplePath(trav), do: addStep(trav, :simplePath)
   #def subGraph(trav, name), do: addStep(trav, :subGraph, %{name: name})
   #def unfold(trav), do: addStep(trav, :unfold)
   #def valueMap(trav, keys \\ []), do: addStep(trav, :valueMap, %{keys: keys})
 
+  def getSteps(trav) do
+    Enum.reverse(trav.steps)
+  end
+
   @doc false
   defp addStep(%Spiro.Traversal{} = trav, type, params \\ %{}) do
-    Map.put(trav, :steps, trav.steps ++ Step.new(type: type, params: params))
-    trav
+    Map.put(trav, :steps, [Step.new(type: type, params: params) | trav.steps])
   end
 end
