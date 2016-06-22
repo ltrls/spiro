@@ -13,14 +13,6 @@ defmodule Spiro.Traversal do
   def addE(trav, label), do: addStep(trav, :addE, %{label: label})
   def addV(trav, label), do: addStep(trav, :addV, %{label: label})
 
-  # http://tinkerpop.apache.org/docs/3.1.1-incubating/reference/#match-step
-  #def match(trav, params), do: trav
-  #def select(trav, params), do: addStep(trav, :select, %{params: params})
-
-  def aggregate(trav, key), do: addStep(trav, :aggregate, %{key: key})
-  def as(trav, label), do: addStep(trav, :as, %{label: label})
-  def barrier(trav, limit \\ nil), do: addStep(trav, :barrier, %{limit: limit})
-
   def has(trav, key), do: addStep(trav, :has, %{key: key})
   def has(trav, key, value), do: addStep(trav, :has, %{key: key, value: value})
   def hasLabel(trav, labels) when is_list(labels), do: addStep(trav, :hasLabel, %{labels: labels})
@@ -39,19 +31,6 @@ defmodule Spiro.Traversal do
   def bothV(trav), do: addStep(trav, :bothV)
   def otherV(trav), do: addStep(trav, :otherV)
 
-  def by(trav, predicate), do: addStep(trav, :by, %{predicate: predicate})
-  def cap(trav, label), do: addStep(trav, :cap, %{label: label})
-  def coin(trav, bias), do: addStep(trav, :coin, %{bias: bias})
-  def constant(trav, value), do: addStep(trav, :constant, %{value: value})
-  def count(trav), do: addStep(trav, :count)
-  def cyclicPath(trav), do: addStep(trav, :cyclicPath)
-  def dedup(trav, params \\ []), do: addStep(trav, :dedup, %{params: params})
-  def drop(trav), do: addStep(trav, :drop)
-  def explain(trav), do: addStep(trav, :explain)
-  def fold(trav), do: addStep(trav, :fold)
-  def fold(trav, seed, reducer), do: addStep(trav, :fold, %{seed: seed, reducer: reducer})
-  def group(trav), do: addStep(trav, :group)
-  def is(trav, predicate), do: addStep(trav, :is, %{predicate: predicate})
   def limit(trav, count), do: addStep(trav, :limit, %{count: count})
   def max(trav), do: addStep(trav, :max)
   def mean(trav), do: addStep(trav, :mean)
@@ -61,22 +40,21 @@ defmodule Spiro.Traversal do
   def property(trav, key, value), do: addStep(trav, :property, %{key: key, value: value})
   def range(trav, low, high), do: addStep(trav, :range, %{low: low, high: high})
   def repeat(trav, predicate), do: addStep(trav, :repeat, %{predicate: predicate})
-  def sample(trav, count), do: addStep(trav, :sample, %{count: count})
-  def simplePath(trav), do: addStep(trav, :simplePath)
-  def subGraph(trav, name), do: addStep(trav, :subGraph, %{name: name})
   def sum(trav), do: addStep(trav, :sum)
   def tail(trav, count \\ 1), do: addStep(trav, :tail, %{count: count})
   def timeLimit(trav, timeout), do: addStep(trav, :timeLimit, %{timeout: timeout})
-  def unfold(trav), do: addStep(trav, :unfold)
-  def valueMap(trav, keys \\ []), do: addStep(trav, :valueMap, %{keys: keys})
-  def where(trav, predicate), do: addStep(trav, :where, %{predicate: predicate})
 
-  # Symbols are ambiguous/reserved.
+  # TODO http://tinkerpop.apache.org/docs/3.1.1-incubating/reference/#match-step
+  #def match(trav, params), do: trav
+  #def select(trav, params), do: addStep(trav, :select, %{params: params})
+  #def where(trav, predicate), do: addStep(trav, :where, %{predicate: predicate})
+
+  # TODO Symbols are ambiguous/reserved.
   #def and(trav, params), do: trav
   #def in(trav, labels \\ []), do: addStep(trav, :in, %{labels: labels})
   #def or(trav, params), do: trav
 
-  # Unclear as to how to proceed with these.
+  # TODO Unclear as to how to proceed with these atm.
   #def choose(trav, params), do: trav
   #def coalesce(trav, params), do: trav
   #def groupCount(trav, params), do: trav
@@ -87,6 +65,27 @@ defmodule Spiro.Traversal do
   #def store(trav, params), do: trav
   #def tree(trav, params), do: trav
   #def union(trav, params), do: trav
+  #def aggregate(trav, key), do: addStep(trav, :aggregate, %{key: key})
+  #def as(trav, label), do: addStep(trav, :as, %{label: label})
+  #def barrier(trav, limit \\ nil), do: addStep(trav, :barrier, %{limit: limit})
+  #def by(trav, predicate), do: addStep(trav, :by, %{predicate: predicate})
+  #def cap(trav, label), do: addStep(trav, :cap, %{label: label})
+  #def coin(trav, bias), do: addStep(trav, :coin, %{bias: bias})
+  #def constant(trav, value), do: addStep(trav, :constant, %{value: value})
+  #def count(trav), do: addStep(trav, :count)
+  #def cyclicPath(trav), do: addStep(trav, :cyclicPath)
+  #def dedup(trav, params \\ []), do: addStep(trav, :dedup, %{params: params})
+  #def drop(trav), do: addStep(trav, :drop)
+  #def explain(trav), do: addStep(trav, :explain)
+  #def fold(trav), do: addStep(trav, :fold)
+  #def fold(trav, seed, reducer), do: addStep(trav, :fold, %{seed: seed, reducer: reducer})
+  #def group(trav), do: addStep(trav, :group)
+  #def is(trav, predicate), do: addStep(trav, :is, %{predicate: predicate})
+  #def sample(trav, count), do: addStep(trav, :sample, %{count: count})
+  #def simplePath(trav), do: addStep(trav, :simplePath)
+  #def subGraph(trav, name), do: addStep(trav, :subGraph, %{name: name})
+  #def unfold(trav), do: addStep(trav, :unfold)
+  #def valueMap(trav, keys \\ []), do: addStep(trav, :valueMap, %{keys: keys})
 
   @doc false
   defp addStep(%Spiro.Traversal{} = trav, type, params \\ %{}) do
