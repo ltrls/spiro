@@ -48,11 +48,6 @@ defmodule Spiro.TraversalTest do
     assert [%Spiro.Traversal.Step{params: %{key: "key"}, type: :hasNot}] = steps
   end
 
-  test "traversal composition with addE and addV" do
-    steps = Spiro.Traversal.new(%{}) |> addV("vertex") |> addE("edge") |> getSteps()
-    assert [%Spiro.Traversal.Step{params: %{label: "vertex"}, type: :addV}, %Spiro.Traversal.Step{params: %{label: "edge"}, type: :addE}] = steps
-  end
-
   test "traversal out" do
     steps = Spiro.Traversal.new(%{}) |> out(["label1", "label2"]) |> getSteps()
     assert [%Spiro.Traversal.Step{params: %{labels: ["label1", "label2"]}, type: :out}] = steps
@@ -151,6 +146,26 @@ defmodule Spiro.TraversalTest do
   test "traversal timeLimit" do
     steps = Spiro.Traversal.new(%{}) |> timeLimit(5000) |> getSteps()
     assert [%Spiro.Traversal.Step{params: %{timeout: 5000}, type: :timeLimit}] = steps
+  end
+
+  test "traversal values" do
+    steps = Spiro.Traversal.new(%{}) |> values(["key1", "key2"]) |> getSteps()
+    [%Spiro.Traversal.Step{params: %{keys: ["key1", "key2"]}, type: :values}] = steps
+  end
+
+  test "traversal vertices" do
+    steps = Spiro.Traversal.new(%{}) |> vertices(["id1", "id2"]) |> getSteps()
+    [%Spiro.Traversal.Step{params: %{ids: ["id1", "id2"]}, type: :V}] = steps
+  end
+
+  test "traversal edges" do
+    steps = Spiro.Traversal.new(%{}) |> edges(["id1", "id2"]) |> getSteps()
+    [%Spiro.Traversal.Step{params: %{ids: ["id1", "id2"]}, type: :E}] = steps
+  end
+
+  test "traversal multistep composition with addE and addV" do
+    steps = Spiro.Traversal.new(%{}) |> addV("vertex") |> addE("edge") |> getSteps()
+    assert [%Spiro.Traversal.Step{params: %{label: "vertex"}, type: :addV}, %Spiro.Traversal.Step{params: %{label: "edge"}, type: :addE}] = steps
   end
 
 end

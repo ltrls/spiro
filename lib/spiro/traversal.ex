@@ -10,6 +10,9 @@ defmodule Spiro.Traversal do
 
   alias Spiro.Traversal.Step
 
+  def vertices(trav, ids \\ []) when is_list(ids), do: addStep(trav, :V, %{ids: ids})
+  def edges(trav, ids \\ []) when is_list(ids), do: addStep(trav, :E, %{ids: ids})
+
   def addE(trav, label), do: addStep(trav, :addE, %{label: label})
   def addV(trav, label), do: addStep(trav, :addV, %{label: label})
 
@@ -21,11 +24,11 @@ defmodule Spiro.Traversal do
   def hasValue(trav, values) when is_list(values), do: addStep(trav, :hasValue, %{values: values})
   def hasNot(trav, key), do: addStep(trav, :hasNot, %{key: key})
 
-  def out(trav, labels \\ []), do: addStep(trav, :out, %{labels: labels})
-  def both(trav, labels \\ []), do: addStep(trav, :both, %{labels: labels})
-  def outE(trav, labels \\ []), do: addStep(trav, :outE, %{labels: labels})
-  def inE(trav, labels \\ []), do: addStep(trav, :inE, %{labels: labels})
-  def bothE(trav, labels \\ []), do: addStep(trav, :bothE, %{labels: labels})
+  def out(trav, labels \\ []) when is_list(labels), do: addStep(trav, :out, %{labels: labels})
+  def both(trav, labels \\ []) when is_list(labels), do: addStep(trav, :both, %{labels: labels})
+  def outE(trav, labels \\ []) when is_list(labels), do: addStep(trav, :outE, %{labels: labels})
+  def inE(trav, labels \\ []) when is_list(labels), do: addStep(trav, :inE, %{labels: labels})
+  def bothE(trav, labels \\ []) when is_list(labels), do: addStep(trav, :bothE, %{labels: labels})
   def outV(trav), do: addStep(trav, :outV)
   def inV(trav), do: addStep(trav, :inV)
   def bothV(trav), do: addStep(trav, :bothV)
@@ -42,6 +45,7 @@ defmodule Spiro.Traversal do
   def sum(trav), do: addStep(trav, :sum)
   def tail(trav, count \\ 1), do: addStep(trav, :tail, %{count: count})
   def timeLimit(trav, timeout), do: addStep(trav, :timeLimit, %{timeout: timeout})
+  def values(trav, keys \\ []) when is_list(keys), do: addStep(trav, :values, %{keys: keys})
 
   # TODO http://tinkerpop.apache.org/docs/3.1.1-incubating/reference/#match-step
   #def match(trav, params), do: trav
