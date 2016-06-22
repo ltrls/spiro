@@ -4,4 +4,7 @@ defmodule Spiro.Vertex do
 
   See more generic operations in **Spiro.Element**.
   """
+
+  defstruct label: nil, properties: %{}
+  use ExConstructor
 end
