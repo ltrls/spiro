@@ -2,12 +2,16 @@ defmodule Spiro.Graph do
   @moduledoc """
   Provides operations specific to graphs.
   """
+  use Behaviour
 
   alias Spiro.Vertex
   alias Spiro.Edge
+  alias Spiro.Traversal
 
   defmacro __using__(opts) do
     quote do
+      @behaviour Spiro.Graph
+
       {config, adapter, adapter_opts} = Spiro.Graph.parse_config(__MODULE__, unquote(opts))
       @adapter adapter
       @config config
@@ -64,12 +68,12 @@ defmodule Spiro.Graph do
         @adapter.delete_edge(edge, __MODULE__)
       end
 
-      # def vertices() do
-      #   @adapter.vertices(__MODULE__)
-      # end # not in neo4j adapter
-      # def edges() do
-      #   @adapter.edges(__MODULE__)
-      # end # not in neo4j adapter
+      def vertices() do
+        @adapter.vertices(__MODULE__)
+      end # not in neo4j adapter
+      def edges() do
+        @adapter.edges(__MODULE__)
+      end # not in neo4j adapter
 
       def properties(list) when is_list(list) do
           Enum.map(list, &properties(&1))
@@ -108,7 +112,7 @@ defmodule Spiro.Graph do
       
       # TODO: these 3 functions (and the 3 next) can be merged into one (with param :in|:out|:all)
       # TODO: these functions should accept a list of labels for neo4j
-      #       but not for digraph
+      #       but not for digraph \\\ maybe digraph adapter should just not use it
       def all_degree(%Vertex{} = vertex) do
         @adapter.all_degree(vertex, __MODULE__)
       end
@@ -186,5 +190,97 @@ defmodule Spiro.Graph do
       "ensure it is correct and it is included as a project dependency"
     end
     {config, adapter, adapter_opts}
+  end
+
+  @type ok_tuple(t) :: {:ok, t} | {:error, String.t}
+  @type element :: Spiro.Vertex.t | Spiro.Edge.t
+
+  # @doc "Add a vertex to the graph."
+  # @callback add_vertex(keyword) :: ok_tuple(Spiro.Vertex.t)
+  # @callback add_vertex(Spiro.Vertex.t) :: ok_tuple(Spiro.Vertex.t)
+  # TODO: ^
+
+  @doc "Add a vertex to the graph, return vertex instead of tuple."
+  @callback add_vertex(properties :: keyword) :: Spiro.Vertex.t
+  @callback add_vertex(vertex :: Spiro.Vertex.t) :: Spiro.Vertex.t
+  # TODO: should be with !
+
+  # @doc "Add an edge to the graph."
+  # @callback add_edge(keyword, Spiro.Vertex.t, Spiro.Vertex.t, String.t) :: ok_tuple(Spiro.Edge.t)
+  # @callback add_edge(keyword, Spiro.Vertex.t, Spiro.Vertex.t) :: ok_tuple(Spiro.Edge.t)
+  # @callback add_edge(Spiro.Edge.t, Spiro.Vertex.t, Spiro.Vertex.t) :: ok_tuple(Spiro.Edge.t)
+  # TODO: ^
+
+  @doc "Add an edge to the graph, return edge instead of tuple."
+  @callback add_edge(properties :: keyword, vertex_from :: Spiro.Vertex.t, vertex_to :: Spiro.Vertex.t, type :: String.t) :: Spiro.Edge.t
+  @callback add_edge(properties :: keyword, vertex_from :: Spiro.Vertex.t, vertex_to :: Spiro.Vertex.t) :: Spiro.Edge.t
+  @callback add_edge(edge :: Spiro.Edge.t) :: Spiro.Edge.t
+  # TODO: should be with !
+
+  @callback update_vertex(vertex :: Spiro.Vertex.t, properties :: keyword) :: Spiro.Vertex.t
+  @callback update_vertex(vertex :: Spiro.Vertex.t) :: Spiro.Vertex.t
+
+  @callback update_edge(edge :: Spiro.Edge.t, properties :: keyword) :: Spiro.Edge.t
+  @callback update_edge(edge :: Spiro.Edge.t) :: Spiro.Edge.t
+
+  @callback delete_vertex(vertex :: Spiro.Vertex.t) :: none
+
+  @callback delete_edge(edge :: Spiro.Edge.t) :: none
+
+  @callback properties(element :: element) :: keyword
+
+  @callback get_property(element :: element, key :: String.t) :: term
+
+  @callback set_property(element :: element, key :: String.t, value :: term) :: none
+
+  @callback all_degree(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: pos_integer
+  @callback in_degree(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: pos_integer
+  @callback out_degree(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: pos_integer
+  @callback all_edges(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: list(Spiro.Edge.t)
+  @callback in_edges(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: list(Spiro.Edge.t)
+  @callback out_edges(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: list(Spiro.Edge.t)
+
+  @callback list_labels() :: list(String.t)
+  @callback list_types() :: list(String.t)
+  @callback vertices_by_label(label :: String.t) :: list(Spiro.Vertex.t)
+  @callback get_labels(vertex :: Spiro.Vertex.t) :: list(String.t)
+  @callback add_labels(vertex :: Spiro.Vertex.t, labels :: list(String.t)) :: Spiro.Vertex.t
+  @callback set_labels(vertex :: Spiro.Vertex.t) :: Spiro.Vertex.t
+  @callback remove_label(vertex :: Spiro.Vertex.t, label :: String.t) :: none
+
+  @callback execute(traversal :: Spiro.Traversal.t) :: tuple
+  @callback execute!(traversal :: Spiro.Traversal.t) :: list
+
+  @doc "Retrieve a list of vertices.  If list of IDs not provided, return all."
+  @callback vertices() :: list(Spiro.Vertex.Vertex)
+
+  @doc "Retrieve a list of edges.  If list of IDs not provided, return all."
+  @callback edges() :: list(Spiro.Edge.t)
+
+  @doc "Return an initialized traverser for use in a query pipeline."
+  @callback traversal() :: Spiro.Traversal.t
+
+  @optional_callbacks list_labels: 0,
+                      list_types: 0,
+                      vertices_by_label: 1,
+                      get_labels: 1,
+                      add_labels: 2,
+                      set_labels: 1,
+                      remove_label: 2
+
+  @doc "Return the list of implemented TinkerPop3 features, if applicable"
+  def features() do
+    #TODO
+    %{
+      "DataTypeFeatures": %{},
+      "EdgeFeatures": %{},
+      "EdgePropertyFeatures": %{},
+      "ElementFeatures": %{},
+      "GraphFeatures": %{},
+      "PropertyFeatures": %{},
+      "VariableFeatures": %{},
+      "VertexFeatures": %{},
+      "VertexPropertyFeatures": %{},
+    }
   end
 end

@@ -4,8 +4,9 @@ defmodule Spiro.Vertex do
 
   See more generic operations in **Spiro.Element**.
   """
+  # use ExConstructor
 
-  defstruct [id: nil, properties: [], labels: []]
+  defstruct id: nil, properties: [], labels: []
   @type t :: %Spiro.Vertex{id: pos_integer | nil,
                                properties: keyword | [],
                                labels: [String.t] | []}

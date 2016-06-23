@@ -4,8 +4,9 @@ defmodule Spiro.Edge do
 
   See more generic operations in **Spiro.Element**.
   """
+  # use ExConstructor
 
-  defstruct [id: nil, from: nil, to: nil, properties: [], type: nil]
+  defstruct id: nil, from: nil, to: nil, properties: [], type: nil
   @type t :: %Spiro.Edge{id: pos_integer | nil,
                          from: Vertex.t | nil,
                          to: Vertex.t | nil,
