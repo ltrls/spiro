@@ -3,78 +3,49 @@ defmodule Spiro.Adapter do
   Provides base for graph system adapters.
   """
 
-  # @type Edge.t
-  # @type Element.t
-  # @type Graph.t
-  # @type Property.t
-  # @type Vertex.t
+  # TODO: fn without ! -> tuple() ;;;;; fn with ! -> elem or raise
+  @callback add_vertex(Spiro.Vertex.t, module) :: Spiro.Vertex.t
+  @callback add_edge(Spiro.Edge.t, module) :: Spiro.Edge.t
+  @callback update_vertex(Spiro.Vertex.t, module) :: Spiro.Vertex.t
+  @callback update_edge(Spiro.Edge.t, module) :: Spiro.Edge.t
+  @callback delete_vertex(Spiro.Vertex.t, module) :: none
+  @callback delete_edge(Spiro.Edge.t, module) :: none
+  @callback vertex_properties(Spiro.Vertex.t, module) :: keyword
+  @callback edge_properties(Spiro.Edge.t, module) :: keyword
+  @callback get_vertex_property(Spiro.Vertex.t, String.t, module) :: term
+  @callback get_edge_property(Spiro.Edge.t, String.t, module) :: term
+  @callback set_vertex_property(Spiro.Vertex.t, String.t, term, module) :: none
+  @callback set_edge_property(Spiro.Edge.t, String.t, term, module) :: none
+
+  @callback list_labels(module) :: list(String.t)
+  @callback list_types(module) :: list(String.t)
+  @callback vertices_by_label(String.t, module) :: list(Spiro.Vertex.t)
+  @callback get_labels(Spiro.Vertex.t, module) :: list(String.t)
+  @callback add_labels(Spiro.Vertex.t, list(String.t), module) :: Spiro.Vertex.t
+  @callback set_labels(Spiro.Vertex.t, module) :: Spiro.Vertex.t
+  @callback remove_label(Spiro.Vertex.t, String.t, module) :: none
+
+  @callback all_degree(Spiro.Vertex.t, list(String.t), module) :: pos_integer
+  @callback in_degree(Spiro.Vertex.t, list(String.t), module) :: pos_integer
+  @callback out_degree(Spiro.Vertex.t, list(String.t), module) :: pos_integer
+  @callback all_edges(Spiro.Vertex.t, list(String.t), module) :: list(Spiro.Edge.t)
+  @callback in_edges(Spiro.Vertex.t, list(String.t), module) :: list(Spiro.Edge.t)
+  @callback out_edges(Spiro.Vertex.t, list(String.t), module) :: list(Spiro.Edge.t)
+
+  @optional_callbacks list_labels: 1,
+                      list_types: 1,
+                      vertices_by_label: 2,
+                      get_labels: 2,
+                      add_labels: 3,
+                      set_labels: 2,
+                      remove_label: 3
+
+  # @callback add_vertex!(Spiro.Vertex.t) :: Spiro.Vertex.t
+  # @callback addEdge!(Spiro.Edge.t, Spiro.Vertex.t, Spiro.Vertex.t) :: Spiro.Edge.t
+  # @callback edges(list()) :: list()
+  # @callback vertices(list()) :: list()
+  # @callback execute(Spiro.Traversal.t) :: tuple()
+  # @callback execute!(Spiro.Traversal.t) :: list()
 
 
-  # @callback addV(Spiro.Traversal.t) :: Spiro.Traversal.t
-  # @callback addE(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback property(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback aggregate(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback as(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback barrier(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback as(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback by(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback cap(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback coalesce(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback count(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback choose(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback coin(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback constant(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback cyclicPath(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback dedup(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback drop(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback explain(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback fold(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback group(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback groupCount(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback has(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback hasLabel(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback hasId(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback hasKey(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback hasValue(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback hasNot(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback inject(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback is(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback limit(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback local(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback match(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback max(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback mean(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback min(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback order(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback path(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback profile(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback range(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback repeat(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback sack(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback sample(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback select(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback simplePath(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback store(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback subGraph(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback sum(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback tail(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback timeLimit(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback tree(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback unfold(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback union(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback valueMap(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback out(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback both(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback outE(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback inE(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback bothE(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback outV(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback inV(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback bothV(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback otherV(Spiro.Traversal.t) :: Spiro.Traversal.t
-  @callback where(Spiro.Traversal.t) :: Spiro.Traversal.t
-
-  #@callback and(Spiro.Traversal.t) :: Spiro.Traversal.t
-  #@callback or(Spiro.Traversal.t) :: Spiro.Traversal.t
-  #@callback in(Spiro.Traversal.t) :: Spiro.Traversal.t
 end
