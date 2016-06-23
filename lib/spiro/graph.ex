@@ -7,19 +7,21 @@ defmodule Spiro.Graph do
   alias Spiro.Edge
 
   defmacro __using__(opts) do
-    quote bind_quoted: [opts: opts] do
-      {otp_app, adapter, config, adapter_opts} = Spiro.Graph.parse_config(__MODULE__, opts)
-      @otp_app otp_app
+    quote do
+      {config, adapter, adapter_opts} = Spiro.Graph.parse_config(__MODULE__, unquote(opts))
       @adapter adapter
       @config config
       @adapter_opts adapter_opts
 
       def traversal(), do: @adapter.traversal()
 
-      def start_link(), do: @adapter.start_link(@adapter_opts, __MODULE__)
 
       def add_vertex(properties) when is_list(properties), do: @adapter.add_vertex(%Vertex{properties: properties}, __MODULE__)
       def add_vertex(%Vertex{} = v), do: @adapter.add_vertex(v, __MODULE__)
+      def start_link() do
+        opts = {@adapter, @adapter_opts, __MODULE__}
+        Spiro.Graph.Supervisor.start_link(opts)
+      end
 
       def add_edge(properties, v1, v2) when is_list(properties), do: @adapter.add_edge(%Edge{properties: properties}, v1, v2, __MODULE__)
       def add_edge(%Edge{} = e, v1, v2), do: @adapter.add_edge(e, v1, v2, __MODULE__)
@@ -61,21 +63,24 @@ defmodule Spiro.Graph do
   end
   
   def parse_config(graph, opts) do
-    otp_app = Keyword.fetch!(opts, :otp_app)
-    config  = Application.get_env(otp_app, graph, [])
-    adapter = opts[:adapter] || config[:adapter]
-    type = opts[:type] || config[:type]
-    adapter_opts = opts[:adapter_opts] || config[:adapter_opts]
+    config  = case Keyword.fetch(opts, :otp_app) do
+      {:ok, otp_app} ->
+        Application.get_env(otp_app, graph, [])
+      :error -> opts
+    end
+    adapter = config[:adapter]
+    adapter_opts = config[:adapter_opts]
 
     unless adapter do
       raise ArgumentError, "missing :adapter configuration in " <>
-      "config #{inspect otp_app}, #{inspect graph}"
+      "config :your_otp_app, #{inspect graph}" <>
+      "or \"use Spiro.Graph\" parameters"
     end
 
     unless Code.ensure_loaded?(adapter) do
       raise ArgumentError, "adapter #{inspect adapter} was not compiled, " <>
       "ensure it is correct and it is included as a project dependency"
     end
-    {otp_app, adapter, type, adapter_opts}
+    {config, adapter, adapter_opts}
   end
 end
