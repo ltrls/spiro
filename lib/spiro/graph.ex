@@ -25,20 +25,21 @@ defmodule Spiro.Graph do
       end
 
       def add_vertex(properties) when is_list(properties) do
-        @adapter.add_vertex(%Vertex{properties: properties}, __MODULE__)
+        add_vertex(%Vertex{properties: properties})
       end
-      def add_vertex(%Vertex{} = v) do
-        @adapter.add_vertex(v, __MODULE__)
+      def add_vertex(%Vertex{} = vertex) do
+        @adapter.add_vertex(vertex, __MODULE__)
       end
 
+      def add_edge(param, v1, v2, type \\ nil)
       def add_edge(properties, v1, v2, type) when is_list(properties) do
-        @adapter.add_edge(%Edge{properties: properties, from: v1, to: v2, type: type}, __MODULE__)
+        add_edge(%Edge{properties: properties, from: v1, to: v2, type: type})
       end
-      def add_edge(properties, v1, v2) when is_list(properties) do
-        @adapter.add_edge(%Edge{properties: properties, from: v1, to: v2}, __MODULE__)
+      def add_edge(%Edge{} = edge, v1, v2, type) do
+        add_edge(%{edge | from: v1, to: v2, type: type})
       end
-      def add_edge(%Edge{} = edge, v1, v2) do
-        @adapter.add_edge(%{edge | from: v1, to: v2}, v1, v2, __MODULE__)
+      def add_edge(%Edge{} = edge) do
+        @adapter.add_edge(edge, __MODULE__)
       end
 
       def update_vertex(%Vertex{} = vertex, properties) when is_list(properties) do
@@ -85,18 +86,18 @@ defmodule Spiro.Graph do
         @adapter.edge_properties(edge, __MODULE__)
       end
 
-      def get_property(%Vertex{} = vertex) do
+      def get_property(%Vertex{} = vertex, key) do
         @adapter.get_vertex_property(vertex, key, __MODULE__)
       end # not in digraph adapter
-      def get_property(%Edge{} = edge) do
+      def get_property(%Edge{} = edge, key) do
         @adapter.get_edge_property(edge, key, __MODULE__)
       end # not in digraph adapter
 
-      def set_property(%Vertex{} = vertex) do
-        @adapter.set_vertex_property(vertex, key, __MODULE__)
+      def set_property(%Vertex{} = vertex, key, value) do
+        @adapter.set_vertex_property(vertex, key, value, __MODULE__)
       end # not in digraph adapter
-      def set_property(%Edge{} = edge) do
-        @adapter.set_edge_property(edge, key, __MODULE__)
+      def set_property(%Edge{} = edge, key, value) do
+        @adapter.set_edge_property(edge, key, value, __MODULE__)
       end # not in digraph adapter
 
       def fetch_properties(element) do
@@ -110,34 +111,17 @@ defmodule Spiro.Graph do
       #   with {from, to} = edge_endpoints(edge), do: edge |> Map.put(:from, from) |> Map.put(:to, to)
       # end # not in neo4j adapter
       
-      # TODO: these 3 functions (and the 3 next) can be merged into one (with param :in|:out|:all)
-      # TODO: these functions should accept a list of labels for neo4j
-      #       but not for digraph \\\ maybe digraph adapter should just not use it
-      def all_degree(%Vertex{} = vertex) do
-        @adapter.all_degree(vertex, __MODULE__)
-      end
-      def in_degree(%Vertex{} = vertex) do
-        @adapter.in_degree(vertex, __MODULE__)
-      end
-      def out_degree(%Vertex{} = vertex) do
-        @adapter.out_degree(vertex, __MODULE__)
+      def node_degree(%Vertex{} = vertex, direction, types \\ []) do
+        @adapter.node_degree(vertex, direction, types, __MODULE__)
       end
 
-      def all_edges(%Vertex{} = vertex) do
-        @adapter.all_edges(vertex, __MODULE__)
+      def adjacent_edges(%Vertex{} = vertex, direction, types \\ []) do
+        @adapter.adjacent_edges(vertex, direction, types, __MODULE__)
       end
-      def in_edges(%Vertex{} = vertex) do
-        @adapter.in_edges(vertex, __MODULE__)
+
+      def node_neighbours(%Vertex{} = vertex, direction, types \\ []) do
+        @adapter.node_neighbours(vertex, direction, types, __MODULE__)
       end
-      def out_edges(%Vertex{} = vertex) do
-        @adapter.out_edges(vertex, __MODULE__)
-      end
-      # def in_neighbours(%Vertex{} = vertex) do
-      #   @adapter.in_neighbour(vertex, __MODULE__)
-      # end # not in neo4j adapter
-      # def out_neighbours(%Vertex{} = vertex) do
-      #   @adapter.out_neighbour(vertex, __MODULE__)
-      # end # not in neo4j adapter
 
       if true do # check if types are supported
         def list_types() do
@@ -233,12 +217,11 @@ defmodule Spiro.Graph do
 
   @callback set_property(element :: element, key :: String.t, value :: term) :: none
 
-  @callback all_degree(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: pos_integer
-  @callback in_degree(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: pos_integer
-  @callback out_degree(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: pos_integer
-  @callback all_edges(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: list(Spiro.Edge.t)
-  @callback in_edges(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: list(Spiro.Edge.t)
-  @callback out_edges(vertex :: Spiro.Vertex.t, types :: list(String.t)) :: list(Spiro.Edge.t)
+  @callback fetch_properties(element :: element) :: element
+
+  @callback node_degree(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: pos_integer
+  @callback adjacent_edges(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: list(Spiro.Edge.t)
+  @callback node_neighbours(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: list(Spiro.Vertex.t)
 
   @callback list_labels() :: list(String.t)
   @callback list_types() :: list(String.t)
