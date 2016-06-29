@@ -42,7 +42,7 @@ defmodule Spiro.Adapter.Digraph do
   end
 
   def update_edge(%Edge{id: id, properties: properties, from: from, to: to} = edge, module) do
-    get_agent(module, &:digraph.add_edge(&1, id, from, to, properties))
+    get_agent(module, &:digraph.add_edge(&1, id, from.id, to.id, properties))
     edge
   end
   def update_edge(%Edge{id: id, from: from, to: to} = edge, fun, module) do
@@ -76,7 +76,7 @@ defmodule Spiro.Adapter.Digraph do
   end
   
   def get_vertex_property(%Vertex{id: id}, key, module) do
-    with {_id, _e1, _e2, properties} = get_agent(module, &:digraph.vertex(&1, id)), do: properties[key]
+    with {_id, properties} = get_agent(module, &:digraph.vertex(&1, id)), do: properties[key]
   end
   
   def get_edge_property(%Edge{id: id}, key, module) do
@@ -84,7 +84,7 @@ defmodule Spiro.Adapter.Digraph do
   end
   
   def set_vertex_property(%Vertex{id: id} = vertex, key, value, module) do
-    with {_id, _e1, _e2, properties} = get_agent(module, &:digraph.vertex(&1, id)), do: update_vertex %{vertex | properties: Keyword.put(properties, key, value)}, module
+    with {_id, properties} = get_agent(module, &:digraph.vertex(&1, id)), do: update_vertex %{vertex | properties: Keyword.put(properties, key, value)}, module
   end
   
   def set_edge_property(%Edge{id: id} = edge, key, value, module) do
@@ -131,5 +131,7 @@ defmodule Spiro.Adapter.Digraph do
   end
 
   def execute(trav), do: []
+
+  def supported_functions, do: %{}
 
 end

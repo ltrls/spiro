@@ -37,8 +37,8 @@ defmodule Spiro.Adapter do
   @callback adjacent_edges(Spiro.Vertex.t, (:in | :out | :all), list(String.t), module) :: list(Spiro.Edge.t)
   @callback node_neighbours(Spiro.Vertex.t, (:in | :out | :all), list(String.t), module) :: list(Spiro.Vertex.t)
 
-  @callback execute(Spiro.Traversal.t) :: tuple
-  @callback execute!(Spiro.Traversal.t) :: list
+  @callback execute(Spiro.Traversal.t, module) :: tuple
+  @callback execute!(Spiro.Traversal.t, module) :: list
 
   @optional_callbacks list_labels: 1,
                       list_types: 1,
@@ -49,15 +49,13 @@ defmodule Spiro.Adapter do
                       remove_label: 3
 
 
+  @callback supported_functions() :: map
 
-  def supported_functions(), do: %{}
-
-  def supports_function?(function) do
-    case supported_functions() do
+  def supports_function?(adapter, function) do
+    case adapter.supported_functions() do
       %{^function => :true} -> :true
       _ -> :false
     end
   end
 
-  defoverridable [supported_functions: 0]
 end

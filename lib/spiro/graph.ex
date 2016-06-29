@@ -47,18 +47,18 @@ defmodule Spiro.Graph do
       end
       # def update_vertex(%Vertex{} = vertex, fun) when is_function(fun) do
       #   @adapter.update_vertex(vertex, fun, __MODULE__)
-      # end # not in neo4j adapter
+      # end # TODO: not in neo4j adapter
       def update_vertex(%Vertex{} = vertex) do
         @adapter.update_vertex(vertex, __MODULE__)
       end
 
-      def update_edge(%Vertex{} = edge, properties) when is_list(properties) do
+      def update_edge(%Edge{} = edge, properties) when is_list(properties) do
         @adapter.update_edge(%{edge | properties: properties}, __MODULE__)
       end
-      # def update_edge(%Vertex{} = edge, fun) when is_function(fun) do
+      # def update_edge(%Edge{} = edge, fun) when is_function(fun) do
       #   @adapter.update_edge(edge, fun, __MODULE__)
-      # end # not in neo4j adapter
-      def update_edge(%Vertex{} = edge) do
+      # end # TODO: not in neo4j adapter
+      def update_edge(%Edge{} = edge) do
         @adapter.update_edge(edge, __MODULE__)
       end
 
@@ -71,10 +71,10 @@ defmodule Spiro.Graph do
 
       def vertices() do
         @adapter.vertices(__MODULE__)
-      end # not in neo4j adapter
+      end # TODO: not in neo4j adapter
       def edges() do
         @adapter.edges(__MODULE__)
-      end # not in neo4j adapter
+      end # TODO: not in neo4j adapter
 
       def properties(list) when is_list(list) do
           Enum.map(list, &properties(&1))
@@ -88,17 +88,17 @@ defmodule Spiro.Graph do
 
       def get_property(%Vertex{} = vertex, key) do
         @adapter.get_vertex_property(vertex, key, __MODULE__)
-      end # not in digraph adapter
+      end
       def get_property(%Edge{} = edge, key) do
         @adapter.get_edge_property(edge, key, __MODULE__)
-      end # not in digraph adapter
+      end
 
       def set_property(%Vertex{} = vertex, key, value) do
         @adapter.set_vertex_property(vertex, key, value, __MODULE__)
-      end # not in digraph adapter
+      end
       def set_property(%Edge{} = edge, key, value) do
         @adapter.set_edge_property(edge, key, value, __MODULE__)
-      end # not in digraph adapter
+      end
 
       def fetch_properties(element) do
           Map.put(element, :properties, properties(element))
@@ -123,13 +123,13 @@ defmodule Spiro.Graph do
         @adapter.node_neighbours(vertex, direction, types, __MODULE__)
       end
 
-      if true do # check if types are supported
+      if Spiro.Adapter.supports_function?(@adapter, :edge_type) do
         def list_types() do
           @adapter.list_types(__MODULE__)
         end
       end
 
-      if true do # check if labels are supported
+      if Spiro.Adapter.supports_function?(@adapter, :vertex_labels) do
         def list_labels() do
           @adapter.list_labels(__MODULE__)
         end
@@ -143,12 +143,19 @@ defmodule Spiro.Graph do
         def add_labels(vertex, labels) do
           @adapter.add_labels(vertex, labels, __MODULE__)
         end
+        def set_labels(vertex, labels) when is_list(labels) do
+          set_labels(%{vertex | labels: labels})
+        end
         def set_labels(vertex) do
           @adapter.set_labels(vertex, __MODULE__)
         end
         def remove_label(vertex, label) do
           @adapter.remove_label(vertex, label, __MODULE__)
         end
+      end
+
+      def supports_function?(function) do
+        Spiro.Adapter.supports_function?(@adapter, function)
       end
 
     end
@@ -195,9 +202,15 @@ defmodule Spiro.Graph do
   # @callback add_edge(Spiro.Edge.t, Spiro.Vertex.t, Spiro.Vertex.t) :: ok_tuple(Spiro.Edge.t)
   # TODO: ^
 
-  @doc "Add an edge to the graph, return edge instead of tuple."
+  @doc """
+  Add an edge to the graph, return edge instead of tuple.
+  `type` is optional.
+  """
   @callback add_edge(properties :: keyword, vertex_from :: Spiro.Vertex.t, vertex_to :: Spiro.Vertex.t, type :: String.t) :: Spiro.Edge.t
-  @callback add_edge(properties :: keyword, vertex_from :: Spiro.Vertex.t, vertex_to :: Spiro.Vertex.t) :: Spiro.Edge.t
+  @doc """
+  `type` is optional.
+  """
+  @callback add_edge(edge :: Spiro.Edge.t, vertex_from :: Spiro.Vertex.t, vertex_to :: Spiro.Vertex.t, type :: String.t) :: Spiro.Edge.t
   @callback add_edge(edge :: Spiro.Edge.t) :: Spiro.Edge.t
   # TODO: should be with !
 
@@ -228,6 +241,7 @@ defmodule Spiro.Graph do
   @callback vertices_by_label(label :: String.t) :: list(Spiro.Vertex.t)
   @callback get_labels(vertex :: Spiro.Vertex.t) :: list(String.t)
   @callback add_labels(vertex :: Spiro.Vertex.t, labels :: list(String.t)) :: Spiro.Vertex.t
+  @callback set_labels(vertex :: Spiro.Vertex.t, labels :: list(String.t)) :: Spiro.Vertex.t
   @callback set_labels(vertex :: Spiro.Vertex.t) :: Spiro.Vertex.t
   @callback remove_label(vertex :: Spiro.Vertex.t, label :: String.t) :: none
 
@@ -242,6 +256,8 @@ defmodule Spiro.Graph do
 
   @doc "Return an initialized traverser for use in a query pipeline."
   @callback traversal() :: Spiro.Traversal.t
+
+  @callback supports_function?(function :: atom) :: boolean
 
   @optional_callbacks list_labels: 0,
                       list_types: 0,
