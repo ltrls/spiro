@@ -31,24 +31,35 @@ defmodule Spiro.Adapter.Digraph do
     Map.put(edge, :id, id)
   end
 
-  def update_vertex(%Vertex{id: id, properties: properties} = vertex, module) do
+  def set_vertex_properties(%Vertex{id: id, properties: properties} = vertex, module) do
     get_agent(module, &:digraph.add_vertex(&1, id, properties))
     vertex
   end
-  def update_vertex(%Vertex{id: id} = vertex, fun, module) do
+  def set_edge_properties(%Edge{id: id, properties: properties, from: from, to: to} = edge, module) do
+    get_agent(module, &:digraph.add_edge(&1, id, from.id, to.id, properties))
+    edge
+  end
+
+  def set_vertex_properties(%Vertex{id: id} = vertex, fun, module) do
     properties = vertex_properties(vertex, module) |> fun.()
     get_agent(module, &:digraph.add_vertex(&1, id, properties))
     %{vertex | properties: properties}
   end
+  def set_edge_properties(%Edge{id: id, from: from, to: to} = edge, fun, module) do
+    properties = edge_properties(edge, module) |> fun.()
+    get_agent(module, &:digraph.add_edge(&1, id, from.id, to.id, properties))
+    %{edge | properties: properties}
+  end
 
-  def update_edge(%Edge{id: id, properties: properties, from: from, to: to} = edge, module) do
+  def add_vertex_properties(%Vertex{id: id, properties: properties} = vertex, _properties, module) do
+    # TODO: not implemented
+    get_agent(module, &:digraph.add_vertex(&1, id, properties))
+    vertex
+  end
+  def add_edge_properties(%Edge{id: id, properties: properties, from: from, to: to} = edge, _properties, module) do
+    # TODO: not implemented
     get_agent(module, &:digraph.add_edge(&1, id, from.id, to.id, properties))
     edge
-  end
-  def update_edge(%Edge{id: id, from: from, to: to} = edge, fun, module) do
-    properties = edge_properties(edge, module) |> fun.()
-    get_agent(module, &:digraph.add_edge(&1, id, from, to, properties))
-    %{edge | properties: properties}
   end
 
   def delete_vertex(%Vertex{id: id}, module) do
@@ -59,12 +70,22 @@ defmodule Spiro.Adapter.Digraph do
     get_agent(module, &:digraph.del_edge(&1, id))
   end
 
-  def vertices(module) do
-    Enum.map(get_agent(module, &:digraph.vertices(&1)), &(%Vertex{id: &1}))
+  def vertices(vertices_id, module) do
+    all_vertices = get_agent(module, &:digraph.vertices(&1))
+    vertices = case vertices_id do
+      []   -> all_vertices
+      list -> Enum.filter(all_vertices, &(&1 in list))
+    end
+    Enum.map(vertices, &(%Vertex{id: &1}))
   end
 
-  def edges(module) do
-    Enum.map(get_agent(module, &:digraph.edges(&1)), &(%Edge{id: &1}))
+  def edges(edges_id, module) do
+    all_edges = get_agent(module, &:digraph.edges(&1))
+    edges = case edges_id do
+      []   -> all_edges
+      list -> Enum.filter(all_edges, &(&1 in list))
+    end
+    Enum.map(edges, &(%Edge{id: &1}))
   end
 
   def vertex_properties(%Vertex{id: id}, module) do
@@ -84,18 +105,18 @@ defmodule Spiro.Adapter.Digraph do
   end
   
   def set_vertex_property(%Vertex{id: id} = vertex, key, value, module) do
-    with {_id, properties} = get_agent(module, &:digraph.vertex(&1, id)), do: update_vertex %{vertex | properties: Keyword.put(properties, key, value)}, module
+    with {_id, properties} = get_agent(module, &:digraph.vertex(&1, id)), do: set_vertex_properties %{vertex | properties: Keyword.put(properties, key, value)}, module
   end
   
   def set_edge_property(%Edge{id: id} = edge, key, value, module) do
-    with {_id, _e1, _e2, properties} = get_agent(module, &:digraph.edge(&1, id)), do: update_edge %{edge | properties: Keyword.put(properties, key, value)}, module
+    with {_id, _e1, _e2, properties} = get_agent(module, &:digraph.edge(&1, id)), do: set_edge_properties %{edge | properties: Keyword.put(properties, key, value)}, module
   end
 
   def edge_endpoints(%Edge{id: id}, module) do
     with {_id, e1, e2, _properties} = get_agent(module, &:digraph.edge(&1, id)), do: {%Vertex{id: e1}, %Vertex{id: e2}}
   end
 
-  def node_degree(%Vertex{id: id}, direction, _types, module) do
+  def vertex_degree(%Vertex{id: id}, direction, _types, module) do
     fun = case direction do
       :in -> &:digraph.in_degree/2
       :out -> &:digraph.out_degree/2
@@ -113,7 +134,7 @@ defmodule Spiro.Adapter.Digraph do
     Enum.map(get_agent(module, &fun.(&1, id)), &(%Edge{id: &1}))
   end
 
-  def node_neighbours(%Vertex{id: id}, direction, _types, module) do
+  def vertex_neighbours(%Vertex{id: id}, direction, _types, module) do
     fun = case direction do
       :in -> &:digraph.in_neighbours/2
       :out -> &:digraph.out_neighbours/2
@@ -130,7 +151,7 @@ defmodule Spiro.Adapter.Digraph do
     end)
   end
 
-  def execute(trav), do: []
+  def execute(_trav), do: []
 
   def supported_functions, do: %{}
 

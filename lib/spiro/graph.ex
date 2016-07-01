@@ -42,38 +42,54 @@ defmodule Spiro.Graph do
         @adapter.add_edge(edge, __MODULE__)
       end
 
-      def update_vertex(%Vertex{} = vertex, properties) when is_list(properties) do
-        @adapter.update_vertex(%{vertex | properties: properties}, __MODULE__)
-      end
-      # def update_vertex(%Vertex{} = vertex, fun) when is_function(fun) do
-      #   @adapter.update_vertex(vertex, fun, __MODULE__)
-      # end # TODO: not in neo4j adapter
-      def update_vertex(%Vertex{} = vertex) do
-        @adapter.update_vertex(vertex, __MODULE__)
-      end
-
-      def update_edge(%Edge{} = edge, properties) when is_list(properties) do
-        @adapter.update_edge(%{edge | properties: properties}, __MODULE__)
-      end
-      # def update_edge(%Edge{} = edge, fun) when is_function(fun) do
-      #   @adapter.update_edge(edge, fun, __MODULE__)
-      # end # TODO: not in neo4j adapter
-      def update_edge(%Edge{} = edge) do
-        @adapter.update_edge(edge, __MODULE__)
+      if Spiro.Adapter.supports_function?(@adapter, :vertex_labels) do
+        def update(element) do
+          case element.labels do
+            [] -> element |> set_properties
+            _  -> element |> set_properties |> set_labels
+          end
+        end
+        def update(element, properties, labels \\ []) do
+          case labels do
+            [] -> element |> set_properties(properties)
+            _  -> element |> set_properties(properties) |> set_labels(labels)
+          end
+        end
+      else
+        def update(element), do: set_properties(element)
+        def update(element, properties), do: set_properties(element, properties)
       end
 
-      def delete_vertex(%Vertex{} = vertex) do
+      def set_properties(%{} = element, properties) when is_list(properties) do
+        set_properties(%{element | properties: properties})
+      end
+      def set_properties(%Vertex{} = vertex) do
+        @adapter.set_vertex_properties(vertex, __MODULE__)
+      end
+      def set_properties(%Edge{} = edge) do
+        @adapter.set_edge_properties(edge, __MODULE__)
+      end
+
+      def add_properties(%Vertex{} = vertex, properties) when is_list(properties) do
+        @adapter.add_vertex_properties(vertex, properties, __MODULE__)
+      end
+      def add_properties(%Edge{} = edge, properties) when is_list(properties) do
+        @adapter.add_edge_properties(edge, properties, __MODULE__)
+      end
+
+      def delete(%Vertex{} = vertex) do
         @adapter.delete_vertex(vertex, __MODULE__)
       end
-      def delete_edge(%Edge{} = edge) do
+      def delete(%Edge{} = edge) do
         @adapter.delete_edge(edge, __MODULE__)
       end
 
-      def vertices() do
-        @adapter.vertices(__MODULE__)
+      def vertices(vertices_id \\ []) do
+        @adapter.vertices(vertices_id, __MODULE__)
       end # TODO: not in neo4j adapter
-      def edges() do
-        @adapter.edges(__MODULE__)
+
+      def edges(edges_id \\ []) do
+        @adapter.edges(edges_id, __MODULE__)
       end # TODO: not in neo4j adapter
 
       def properties(list) when is_list(list) do
@@ -111,16 +127,16 @@ defmodule Spiro.Graph do
       #   with {from, to} = edge_endpoints(edge), do: edge |> Map.put(:from, from) |> Map.put(:to, to)
       # end # not in neo4j adapter
       
-      def node_degree(%Vertex{} = vertex, direction, types \\ []) do
-        @adapter.node_degree(vertex, direction, types, __MODULE__)
+      def vertex_degree(%Vertex{} = vertex, direction, types \\ []) do
+        @adapter.vertex_degree(vertex, direction, types, __MODULE__)
       end
 
       def adjacent_edges(%Vertex{} = vertex, direction, types \\ []) do
         @adapter.adjacent_edges(vertex, direction, types, __MODULE__)
       end
 
-      def node_neighbours(%Vertex{} = vertex, direction, types \\ []) do
-        @adapter.node_neighbours(vertex, direction, types, __MODULE__)
+      def vertex_neighbours(%Vertex{} = vertex, direction, types \\ []) do
+        @adapter.vertex_neighbours(vertex, direction, types, __MODULE__)
       end
 
       if Spiro.Adapter.supports_function?(@adapter, :edge_type) do
@@ -161,6 +177,7 @@ defmodule Spiro.Graph do
     end
   end
   
+  @doc false
   def parse_config(graph, opts) do
     config  = case Keyword.fetch(opts, :otp_app) do
       {:ok, otp_app} ->
@@ -191,7 +208,10 @@ defmodule Spiro.Graph do
   # @callback add_vertex(Spiro.Vertex.t) :: ok_tuple(Spiro.Vertex.t)
   # TODO: ^
 
-  @doc "Add a vertex to the graph, return vertex instead of tuple."
+  @doc """
+  Adds a vertex to the graph. Returns vertex or raises an exception in case of error.
+  The argument can be a keyword list of properties, or a `%Vertex{}` struct.
+  """
   @callback add_vertex(properties :: keyword) :: Spiro.Vertex.t
   @callback add_vertex(vertex :: Spiro.Vertex.t) :: Spiro.Vertex.t
   # TODO: should be with !
@@ -203,59 +223,108 @@ defmodule Spiro.Graph do
   # TODO: ^
 
   @doc """
-  Add an edge to the graph, return edge instead of tuple.
+  Adds an edge to the graph. Returns vertex or raises an exception in case of error.
   `type` is optional.
   """
   @callback add_edge(properties :: keyword, vertex_from :: Spiro.Vertex.t, vertex_to :: Spiro.Vertex.t, type :: String.t) :: Spiro.Edge.t
-  @doc """
-  `type` is optional.
-  """
   @callback add_edge(edge :: Spiro.Edge.t, vertex_from :: Spiro.Vertex.t, vertex_to :: Spiro.Vertex.t, type :: String.t) :: Spiro.Edge.t
+  @doc """
+  Adds an edge to the graph. Returns vertex or raises an exception in case of error.
+  Expects the `%Edge{}` struct passed in parameter to include adjacent vertices (in `:from` and `:to` fields).
+
+  """
   @callback add_edge(edge :: Spiro.Edge.t) :: Spiro.Edge.t
   # TODO: should be with !
 
-  @callback update_vertex(vertex :: Spiro.Vertex.t, properties :: keyword) :: Spiro.Vertex.t
-  @callback update_vertex(vertex :: Spiro.Vertex.t) :: Spiro.Vertex.t
+  @doc """
+  Updates properties of the given element, and labels if applicable. Expects data to be included in the given struct.
+  """
+  @callback update(element :: element) :: element
 
-  @callback update_edge(edge :: Spiro.Edge.t, properties :: keyword) :: Spiro.Edge.t
-  @callback update_edge(edge :: Spiro.Edge.t) :: Spiro.Edge.t
+  @doc """
+  Updates properties of the given element.
+  """
+  @callback update(element :: element, properties :: keyword) :: element
 
-  @callback delete_vertex(vertex :: Spiro.Vertex.t) :: none
+  @doc """
+  Updates properties and labels of the given element.
+  """
+  @callback update(element :: element, properties :: keyword, labels :: list(String.t)) :: element
 
-  @callback delete_edge(edge :: Spiro.Edge.t) :: none
+  @doc "Sets properties from a vertex or an edge."
+  @callback set_properties(element :: element, properties :: keyword) :: element
 
+  @doc "Sets properties from a vertex or an edge. Expects properties to be included in the given struct."
+  @callback set_properties(element :: element) :: element
+
+  @doc "Adds properties to the given vertex or edge."
+  @callback add_properties(element :: element, properties :: keyword) :: element
+
+  @doc "Deletes a vertex or an edge."
+  @callback delete(element :: element) :: true
+
+  @doc "Gets properties from a vertex or an edge. Returns the properties."
   @callback properties(element :: element) :: keyword
 
+  @doc "Gets a single property from a vertex or an edge."
   @callback get_property(element :: element, key :: String.t) :: term
 
-  @callback set_property(element :: element, key :: String.t, value :: term) :: none
+  @doc "Sets a property from a vertex or an edge."
+  @callback set_property(element :: element, key :: atom, value :: term) :: element
 
+  @doc "Gets properties from a vertex or an edge. Returns the element with its properties fetched."
   @callback fetch_properties(element :: element) :: element
 
-  @callback node_degree(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: pos_integer
-  @callback adjacent_edges(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: list(Spiro.Edge.t)
-  @callback node_neighbours(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: list(Spiro.Vertex.t)
+  @doc """
+  Gets the degree of the given vertex. Expects a direction (`:in` for emanating edges, `:out` for incident edges, `:all` for both), and an optional list of edge types.
+  """
+  @callback vertex_degree(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: pos_integer
 
+  @doc """
+  Gets a list of adjacent edges of the given vertex. Expects a direction (`:in` for emanating edges, `:out` for incident edges, `:all` for both), and an optional list of edge types.
+  """
+  @callback adjacent_edges(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: list(Spiro.Edge.t)
+
+  @doc """
+  Gets the list of neighbour vertices of the given vertex. Expects a direction (`:in` for emanating edges, `:out` for incident edges, `:all` for both), and an optional list of edge types.
+  """
+  @callback vertex_neighbours(vertex :: Spiro.Vertex.t, direction :: (:in | :out | :all), types :: list(String.t)) :: list(Spiro.Vertex.t)
+
+  @doc "Lists all labels of vertices in the graph."
   @callback list_labels() :: list(String.t)
+
+  @doc "Lists all types of edges in the graph."
   @callback list_types() :: list(String.t)
+
+  @doc "Gets a list a vertices having the given label."
   @callback vertices_by_label(label :: String.t) :: list(Spiro.Vertex.t)
+
+  @doc "Gets the labels of the given vertex."
   @callback get_labels(vertex :: Spiro.Vertex.t) :: list(String.t)
+
+  @doc "Adds a list of labels to the given vertex."
   @callback add_labels(vertex :: Spiro.Vertex.t, labels :: list(String.t)) :: Spiro.Vertex.t
+
+  @doc "Resets the labels of the given vertex."
   @callback set_labels(vertex :: Spiro.Vertex.t, labels :: list(String.t)) :: Spiro.Vertex.t
+
+  @doc "Resets the labels of the given vertex. Expects the labels to be included in the `%Vertex` struct."
   @callback set_labels(vertex :: Spiro.Vertex.t) :: Spiro.Vertex.t
+
+  @doc "Removes a label from the given vertex."
   @callback remove_label(vertex :: Spiro.Vertex.t, label :: String.t) :: none
+
+  @doc "Retrieves a list of vertices.  If list of IDs not provided, returns all."
+  @callback vertices(list(pos_integer)) :: list(Spiro.Vertex.Vertex)
+
+  @doc "Retrieves a list of edges.  If list of IDs not provided, returns all."
+  @callback edges(list(pos_integer)) :: list(Spiro.Edge.t)
+
+  @doc "Returns an initialized traverser for use in a query pipeline."
+  @callback traversal() :: Spiro.Traversal.t
 
   @callback execute(traversal :: Spiro.Traversal.t) :: tuple
   @callback execute!(traversal :: Spiro.Traversal.t) :: list
-
-  @doc "Retrieve a list of vertices.  If list of IDs not provided, return all."
-  @callback vertices() :: list(Spiro.Vertex.Vertex)
-
-  @doc "Retrieve a list of edges.  If list of IDs not provided, return all."
-  @callback edges() :: list(Spiro.Edge.t)
-
-  @doc "Return an initialized traverser for use in a query pipeline."
-  @callback traversal() :: Spiro.Traversal.t
 
   @callback supports_function?(function :: atom) :: boolean
 
@@ -264,8 +333,10 @@ defmodule Spiro.Graph do
                       vertices_by_label: 1,
                       get_labels: 1,
                       add_labels: 2,
+                      set_labels: 2,
                       set_labels: 1,
-                      remove_label: 2
+                      remove_label: 2,
+                      update: 3
 
   @doc "Return the list of implemented TinkerPop3 features, if applicable"
   def features() do
