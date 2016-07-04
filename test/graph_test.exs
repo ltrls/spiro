@@ -94,16 +94,16 @@ defmodule GraphTest do
     new_properties2 = [foo5: "bar5"]
     Graph.add_properties(v1, new_properties)
     Graph.add_properties(e, new_properties2)
-    assert Graph.properties(v1) == properties ++ new_properties
-    assert Graph.properties(e) == properties2 ++ new_properties2
+    assert Enum.sort(Graph.properties(v1)) == Enum.sort(properties ++ new_properties)
+    assert Enum.sort(Graph.properties(e)) == Enum.sort(properties2 ++ new_properties2)
   end
 
   test "delete(element :: element)" do
     v1 = Graph.add_vertex([foo: "bar"])
     v2 = Graph.add_vertex([foo2: "bar2"])
     e = Graph.add_edge([foo3: "bar3"], v1, v2, "knows")
-    Graph.delete(v1)
     Graph.delete(e)
+    Graph.delete(v1)
     assert Graph.properties(v1) == {:error, :not_found}
     assert Graph.properties(e) == {:error, :not_found}
   end
